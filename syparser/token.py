@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 from .exceptions.grammar_exception import GrammarException
 from .token_type import TokenType
 
-_GRAMMAR_FILE = os.path.join( os.path.dirname( __file__ ), '../grammar/tokens' )
+_GRAMMAR_FILE = os.path.join(os.path.dirname(__file__), '../grammar/tokens')
 
 
 def get_tokens_bijection_from_grammar_file(file: str) -> Dict[str, TokenType]:

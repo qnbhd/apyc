@@ -17,6 +17,8 @@ class TokenType(Enum):
     STAR = auto(),
     SLASH = auto(),
     VBAR = auto(),
+    DOUBLEVBAR = auto(),
+    DOUBLEAMPER = auto(),
     AMPER = auto(),
     LESS = auto(),
     GREATER = auto(),
@@ -52,9 +54,17 @@ class TokenType(Enum):
     RARROW = auto(),
     ELLIPSIS = auto(),
     COLONEQUAL = auto(),
+    FOR = auto(),
+    IF = auto(),
+    ELSE = auto()
+    TYPEINT = auto()
+    PRINTF = auto()
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.name
+
+    def __eq__(self, other):
+        return self.name == other.name
