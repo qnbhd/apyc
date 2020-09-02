@@ -2,6 +2,9 @@ from enum import Enum, auto
 
 
 class AstNodeType(Enum):
+    """
+    Перечисление с типами листов
+    """
     IDENTIFIER = auto(),
 
     VARIABLE_DECLARATION = auto(),

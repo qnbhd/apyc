@@ -2,6 +2,9 @@ from enum import Enum, auto
 
 
 class TokenType(Enum):
+    """
+    Класс перечисление со списком зарезерврованных токенов
+    """
     ENDMARKER = auto(),
     NAME = auto(),
     NUMBER = auto(),

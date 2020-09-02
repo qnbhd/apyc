@@ -5,15 +5,21 @@ from .var_table import VariableTable
 
 
 class AST:
+    """
+    Класс для абстрактного синтаксического дерева
+
+    """
     tree: AstNode
 
     variables: VariableTable
 
     def __init__(self):
         self.tree = None
+        # обьявляем таблицу переменных
         self.variables = VariableTable()
 
     def print_recursive(self, current_node: AstNode, level: int, out=print):
+        # удобочитаемый вывод AST дерева
         if current_node is None:
             return
 

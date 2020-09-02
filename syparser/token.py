@@ -7,7 +7,14 @@ _GRAMMAR_FILE = os.path.join(os.path.dirname(__file__), '../grammar/tokens')
 
 
 def get_tokens_bijection_from_grammar_file(file: str) -> Dict[str, TokenType]:
+    """
+    Эта функция необходима для получения словаря, где
+    ключ - лексема, а значение - положение в перечислении TokenType
+    """
     def _unpack(raw_) -> Tuple[str, str]:
+        """
+        Удобная внутрення функция для распаковки данных из grammar-файла
+        """
         if len(raw_) == 2:
             token_name_, lexeme_ = raw_
             return token_name_, lexeme_
@@ -45,11 +52,18 @@ class Token:
 
     @staticmethod
     def is_number(lexeme: str) -> bool:
+        """
+        В курсовой работе не поддерживаются десятичные числа, потому что их
+        реализация в ассемблера сложная
+        """
         if lexeme.find('.') != -1:
             raise ValueError("Decimal numbers is not supported for this version")
         return lexeme.isdigit()
 
     def __str__(self):
+        """
+        Метод для вывода на экран
+        """
         return "(" + str(self.type) + ", " + self.lexeme + ")"
 
     def __repr__(self):

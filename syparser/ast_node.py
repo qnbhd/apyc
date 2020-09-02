@@ -2,6 +2,9 @@ from .ast_node_type import AstNodeType
 
 
 class AstNode:
+    """
+    Класс для листа AST-дерева
+    """
     type: AstNodeType
     value: str
     child_nodes: list

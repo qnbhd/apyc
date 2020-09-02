@@ -1,4 +1,7 @@
 class Variable:
+    """
+    Класс переменной
+    """
     name: str
 
     def __init__(self, name_: str):

@@ -2,6 +2,9 @@ from .variable import Variable
 
 
 class VariableTable:
+    """
+    Таблица переменных
+    """
     table: list
 
     def __init__(self):

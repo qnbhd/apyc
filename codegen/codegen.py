@@ -10,6 +10,9 @@ from .asmconstants import *
 
 
 class CodeGenPlace(Enum):
+    """
+    Перечисление для того места, куда мы записываем данные
+    """
     DATA = auto(),  # сегмент данных
     BEFORE_MAIN = auto(),  # до метки __start:
     MAIN = auto()  # main
@@ -55,10 +58,10 @@ class CodeGen:
         self.count_compare = 0
 
     def generate(self):  # генерируем
-        self.init_variables()
-        self.init_operands_for_division()
+        self.init_variables()  # переменные
+        self.init_operands_for_division()  # операнды для деления
 
-        self.init_print_function()
+        self.init_print_function()  # printf -  оператор
 
         self.block_to_asm()
 
@@ -106,6 +109,10 @@ class CodeGen:
         self.block_to_asm_recursive(self.ast.tree)
 
     def block_to_asm_recursive(self, current_node: AstNode):
+        """
+        Тут мы обрабатываем разные блоки нашего языка - if, for, описание переменной и тд..
+        Все рекурсивно
+        """
         if current_node is None:
             return
 
@@ -337,6 +344,7 @@ class CodeGen:
         self.before_main.append(variable_name + "_variable = " + "-" + str(self.byte_on_stack) + "\n")
         self.byte_on_stack += 4
 
+    # а тут удобные функции, соответсвующие командам ассемблера
     def push(self, value: str):
         self.current_place_for_writing.append(tab + "push " + value + "\n")
 

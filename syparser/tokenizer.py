@@ -3,6 +3,11 @@ from .token_type import TokenType
 
 
 class Tokenizer:
+    """
+    Класс лексического анализатора. На вход принимает входную строку (текст) и
+    на выходе выдает список токенов, описанных в классе TokenType. Также в файле tokens (grammar)
+    есть соответствие между токеном и его лексемой.
+    """
     code: str
     tokens: [Token]
     _NOT_SUPPORTED = '"\''
@@ -19,16 +24,24 @@ class Tokenizer:
         buffer = ""
 
         for i, sym in enumerate(self.code):
+            # есть список символов, которые не поддерживаются
+            # в курсовой работе не поддерживаются строки и в списке
+            # __NOT_SUPPORTED они описаны
+
             if sym in Tokenizer._NOT_SUPPORTED:
                 raise ValueError(f"Symbol '{sym}' are not supported at this version")
             if self.is_sep(sym):
+                # если символ - разделитель => передает обработчику
                 buffer = self.sep_handler(buffer, sym)
             else:
+                # иначе дальше заполняем буффер
                 buffer += sym
 
+        # если что-то осталось - внесем в список токенов
         if buffer != "":
             self.tokens.append(Token(buffer))
 
+        # передаем управление методу, который 'соединяет' составные токены (допустим <=)
         self.tokens = self.adj_sub(self.tokens)
         return self.tokens
 
@@ -37,6 +50,7 @@ class Tokenizer:
             instance = Token(buffer)
             self.tokens.append(instance)
             buffer = ""
+        # тут например обрабатываются +, -  и т.д, единичные символы
         if sym != " " and sym != '\n' and sym != '\t':
             instance = Token(sym)
             self.tokens.append(instance)
@@ -46,6 +60,7 @@ class Tokenizer:
         hatch_tokens = []
         i = 0
         while i < len(raw_tokens):
+            # проверка на соответствие
             if i < len(raw_tokens) - 1 and self.is_adj_operator(raw_tokens[i], raw_tokens[i + 1]):
                 instance = Token(raw_tokens[i].lexeme + raw_tokens[i + 1].lexeme)
                 hatch_tokens.append(instance)
@@ -69,4 +84,7 @@ class Tokenizer:
 
     @staticmethod
     def is_sep(sym) -> bool:
+        """
+        возвращает True если sym - разделитель
+        """
         return sym in " ()+-*/[]<>{}=!:;.,\n\t\r"

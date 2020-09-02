@@ -8,11 +8,29 @@ from .ast_node_type import AstNodeType
 
 
 class Parser:
+    """
+    Класс для синтаксического анализатора (парсера). На вход получает
+    список токенов, по нему строит абстрактное синтаксическое дерево AST.
+    Работает по методу рекурсивного спуска. Этот метод заключается в том, что
+    каждому правилу формального языка соответсвует метод в данном классе.
+
+    Сначала в дереве у нас корень PROGRAM - начало программы.
+    Дальше к нему подвешиваются STATEMENT_LIST - листы утверждений.
+    Этот трюк используется для того, чтобы AST росло в высоту, а не в ширину.
+    Такое дерево легче обрабатывать на этапе генерации кода.
+
+    Дальше идут просто листы AstNode - с типом и аргументами (подлистами) (для удобства
+    их максимальное количество равно 4 (цикл for имеет три листа):
+    for ( <раздел инициализации>; <раздел условия>; <пост-эффект>;)
+    {
+        <раздел кода>
+    }
+    """
     tokenizer: Tokenizer
     ast: AST
 
     tokens: list
-    pos: int
+    pos: int  # позиция чтения токенов
 
     tokens_count: int
 
@@ -32,12 +50,14 @@ class Parser:
         self.in_block_not_main = False
 
     def get(self, relative_position: int) -> Token:
+        # обертка для получения токена по относительной позиции
         position = self.pos + relative_position
         if position >= self.tokens_count:
             return Token('\0')
         return self.tokens[position]
 
     def match(self, type_: TokenType) -> bool:
+        # метод 'угадали ли мы тип текущего токена', если да, то => True
         current = self.get(0)
 
         if type_ != current.type:
@@ -47,6 +67,8 @@ class Parser:
         return True
 
     def consume(self, type_: TokenType) -> Token:
+        # а этот метод обязательно должен прочитать токен определенного типа
+        # иначе будет выброшено исключение
         current = self.get(0)
 
         if type_ != current.type:
@@ -56,14 +78,25 @@ class Parser:
         return current
 
     def parse(self):
+        """
+        Главная функция, которая запускает синтаксический анализ
+        """
+
+        # сначала прикрепляем узел PROGRAM
         self.ast.tree = AstNode(AstNodeType.PROGRAM)
 
+        # дальше мы просто читаем конструкцию
+        """
+        int main() {
+        }
+        """
         self.consume(TokenType.TYPEINT)
         self.consume(TokenType.NAME)
 
         self.consume(TokenType.LPAR)
         self.consume(TokenType.RPAR)
 
+        # а тут уже запускаем рекурсивный спуск
         statement = self.bracket_expression()
 
         # statement_list_package_node: AstNode = AstNode(AstNodeType.STATEMENT_LIST, '', package_node)
@@ -76,7 +109,7 @@ class Parser:
         self.ast.variables.log_out()
 
     def bracket_expression(self) -> AstNode:
-
+        # это просто выражение в фигурных скобках
         self.consume(TokenType.LBRACE)
 
         node = None
@@ -97,6 +130,8 @@ class Parser:
         return node
 
     def statement(self) -> AstNode:
+        # нетерминал - выражение
+        # тут обработаем блок if-else а дальше по аналогии
         if self.match(TokenType.IF):
             return self.if_else_block()
 
@@ -109,6 +144,7 @@ class Parser:
         return self.expression_statement()
 
     def print_operator(self):
+        # обработка printf - оператора
         self.consume(TokenType.PRINTF)
         self.consume(TokenType.LPAR)
         arg_node: AstNode = self.expression()
@@ -133,6 +169,7 @@ class Parser:
         return AstNode(node_type, '', condition, if_block_statement, else_block)
 
     def for_block(self) -> AstNode:
+        # блок для обработки цикла
         self.consume(TokenType.LPAR)
         initialization_node: AstNode = self.expression()
         self.consume(TokenType.SEMI)
@@ -148,6 +185,11 @@ class Parser:
         return AstNode(AstNodeType.FOR, '', initialization_node, condition_node, aftereffect_node, statement_node)
 
     def declaration_statement(self) -> AstNode:
+        # описание переменной
+        # в нашей программе в целом нет типизации
+        # но фиктивно мы считываем тип int, как в языке Си
+        # тип int - единственный, с которым мы работаем
+
         self.consume(TokenType.TYPEINT)
 
         current: Token = self.get(0)
@@ -186,6 +228,7 @@ class Parser:
         return node
 
     def logical_or(self) -> AstNode:
+        # обработка логического OR
         node: AstNode = self.logical_and()
 
         if self.match(TokenType.DOUBLEVBAR):
@@ -202,6 +245,7 @@ class Parser:
         return node
 
     def equality(self) -> AstNode:
+        # обработка ==
         result: AstNode = self.conditional()
 
         if self.match(TokenType.EQEQUAL):
@@ -230,6 +274,8 @@ class Parser:
         return result
 
     def add(self) -> AstNode:
+        # обработка сложения
+
         multy_node: AstNode = self.multy()
 
         if self.match(TokenType.PLUS):
@@ -263,6 +309,8 @@ class Parser:
         return self.primary()
 
     def primary(self) -> AstNode:
+        # это самый высокий по приоритету блок - тут обработка чисел,
+        # printf оператора
         current: Token = self.get(0)
 
         if self.match(TokenType.NUMBER):
@@ -284,6 +332,8 @@ class Parser:
         return None
 
     def par_expression(self) -> AstNode:
+        # выражение в круглых скобках
+
         if not self.match(TokenType.LPAR):
             raise Exception("LEFT PAREN WAS EXCEPTED")
 
